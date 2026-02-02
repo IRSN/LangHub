@@ -1,0 +1,71 @@
+#!/bin/bash
+# lh - LangHub unified entrypoint
+# Usage: lh <command> [args...]
+# Commands:
+#   ask <engine> <model-id> <prompt> [options]  - Prompt a model
+#   list <engine>                                - List available models
+#   render <file.lmd>                            - Process .lmd files
+
+set -e
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Check if command is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: lh <command> [args...]" >&2
+    echo "" >&2
+    echo "Commands:" >&2
+    echo "  ask <engine> <model-id> <prompt> [options]  - Prompt a model" >&2
+    echo "  list <engine>                                - List available models" >&2
+    echo "  render <file.lmd>                            - Process .lmd files" >&2
+    echo "" >&2
+    echo "Examples:" >&2
+    echo "  lh ask ollama qwen2.5-coder:7b \"Write a hello world\"" >&2
+    echo "  lh list claude" >&2
+    echo "  lh render input.lmd" >&2
+    exit 1
+fi
+
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
+    ask)
+        exec "$SCRIPT_DIR/ask.sh" "$@"
+        ;;
+    list)
+        exec "$SCRIPT_DIR/list.sh" "$@"
+        ;;
+    render)
+        exec "$SCRIPT_DIR/render.sh" "$@"
+        ;;
+    help|--help|-h)
+        echo "LangHub - Unified interface for LLM providers"
+        echo ""
+        echo "Usage: lh <command> [args...]"
+        echo ""
+        echo "Commands:"
+        echo "  ask <engine> <model-id> <prompt> [options]  - Prompt a model"
+        echo "  list <engine>                                - List available models"
+        echo "  render <file.lmd>                            - Process .lmd files"
+        echo ""
+        echo "Engines:"
+        echo "  ollama   - Local Ollama models (free)"
+        echo "  claude   - Anthropic Claude (via CLI)"
+        echo "  copilot  - GitHub Copilot (via CLI)"
+        echo ""
+        echo "Examples:"
+        echo "  lh ask ollama qwen2.5-coder:7b \"Write a hello world\""
+        echo "  lh list claude"
+        echo "  lh render input.lmd"
+        echo ""
+        echo "For more information, see README.md"
+        ;;
+    *)
+        echo "Error: Unknown command '$COMMAND'" >&2
+        echo "Valid commands: ask, list, render" >&2
+        echo "Run 'lh help' for usage information" >&2
+        exit 1
+        ;;
+esac
