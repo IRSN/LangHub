@@ -59,12 +59,16 @@ Ollama runs on `http://localhost:11434` by default.
 
 ### Custom URI
 
-If you're running Ollama on a different host or port:
+If you're running Ollama on a different host or port, you can specify a custom URI using the syntax `ollama:http://server:port`:
 
 ```bash
-# Use custom URI
-scripts/list.sh ollama:http://192.168.1.100:11434
-scripts/ask.sh ollama:http://192.168.1.100:11434 qwen2.5-coder:7b "Hello"
+# Use localhost explicitly
+./lh list ollama:http://localhost:11434
+./lh ask ollama:http://localhost:11434 qwen2.5-coder:7b "Hello"
+
+# Use remote Ollama server
+./lh list ollama:http://192.168.1.100:11434
+./lh ask ollama:http://192.168.1.100:11434 qwen2.5-coder:7b "Hello"
 ```
 
 ## Usage
@@ -73,20 +77,20 @@ scripts/ask.sh ollama:http://192.168.1.100:11434 qwen2.5-coder:7b "Hello"
 
 ```bash
 # List locally installed models
-scripts/list.sh ollama
+./lh list ollama
 ```
 
 ### Prompt a Model
 
 ```bash
 # Simple prompt
-scripts/ask.sh ollama qwen2.5-coder:7b "Write a hello world program in Python"
+./lh ask ollama qwen2.5-coder:7b "Write a hello world program in Python"
 
 # With context
-scripts/ask.sh ollama qwen2.5-coder:7b "Explain this code" --context lib/README.md
+./lh ask ollama qwen2.5-coder:7b "Explain this code" --context lib/README.md
 
 # Save output to file
-scripts/ask.sh ollama qwen2.5-coder:7b "Summarize the documentation" \
+./lh ask ollama qwen2.5-coder:7b "Summarize the documentation" \
     --context lib/ --output summary.md
 ```
 
@@ -100,7 +104,7 @@ Analyze the code and provide insights.
 
 Process the .lmd file:
 ```bash
-scripts/render.sh src/input.lmd
+./lh render src/input.lmd
 ```
 
 ## Available Models
@@ -206,17 +210,15 @@ ollama pull mistral:7b
 
 ## Advantages
 
-- **Free**: No API costs
 - **Privacy**: Runs completely locally
 - **Offline**: Works without internet after download
-- **Fast**: No network latency
+- **No network latency**: Local processing
 - **Easy**: Simple installation and usage
 
 ## Limitations
 
 - **Hardware requirements**: Needs decent CPU/GPU and RAM
 - **Model size**: Large models require significant disk space
-- **Quality**: May not match cloud models like Claude or GPT-4
 - **Setup time**: Initial model downloads can be large (4-20GB)
 
 ## Recommended Setup

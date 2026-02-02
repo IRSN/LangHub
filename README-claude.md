@@ -17,7 +17,7 @@ Follow the installation instructions at: https://docs.anthropic.com/claude/docs/
 
 ```bash
 # List available models
-scripts/list.sh claude
+./lh list claude
 ```
 
 ## Available Models
@@ -30,33 +30,34 @@ scripts/list.sh claude
 ### Previous Generation
 - `claude-3-opus-20240229` - Claude 3 Opus (most capable, slower)
 - `claude-3-sonnet-20240229` - Claude 3 Sonnet
-- `claude-3-haiku-20240307` - Claude 3 Haiku (fastest, cheapest)
+- `claude-3-haiku-20240307` - Claude 3 Haiku (fastest)
 
 ### Model Selection Guide
 
-- **Best quality**: `claude-sonnet-4-5` or `claude-3-opus-20240229`
+- **Latest and most capable**: `claude-sonnet-4-5`
+- **Previous generation most capable**: `claude-3-opus-20240229`
 - **Balanced**: `claude-3-5-sonnet-20241022`
-- **Fast/cheap**: `claude-3-5-haiku-20241022`
+- **Fastest**: `claude-3-5-haiku-20241022`
 
 ## Usage
 
 ### List Available Models
 
 ```bash
-scripts/list.sh claude
+./lh list claude
 ```
 
 ### Prompt a Model
 
 ```bash
 # Simple prompt
-scripts/ask.sh claude claude-3-5-sonnet-20241022 "Write a hello world program in Python"
+./lh ask claude claude-3-5-sonnet-20241022 "Write a hello world program in Python"
 
 # With context
-scripts/ask.sh claude claude-3-5-sonnet-20241022 "Explain this code" --context lib/README.md
+./lh ask claude claude-3-5-sonnet-20241022 "Explain this code" --context lib/README.md
 
 # Save output to file
-scripts/ask.sh claude claude-3-5-sonnet-20241022 "Summarize the documentation" \
+./lh ask claude claude-3-5-sonnet-20241022 "Summarize the documentation" \
     --context lib/ --output summary.md
 ```
 
@@ -70,21 +71,8 @@ Analyze the code and provide insights.
 
 Process the .lmd file:
 ```bash
-scripts/render.sh src/input.lmd
+./lh render src/input.lmd
 ```
-
-## Pricing
-
-Pricing depends on your Claude account and usage plan.
-
-See latest pricing at: https://www.anthropic.com/pricing
-
-Typical costs:
-- **Pay-per-use**: $3-15 per million input tokens, $5-75 per million output tokens
-- **Pro plan**: $20/month with included credits
-- **Team plans**: Custom pricing
-
-Usage is tracked through your Claude account. Check usage at: https://console.anthropic.com/settings/usage
 
 ## Configuration
 
@@ -132,36 +120,30 @@ claude login
 
 ## Advantages
 
-- **Best quality**: State-of-the-art language understanding
-- **Flexible pricing**: Pay-per-use or subscription options
+- **State-of-the-art language understanding**
 - **Long context**: Supports up to 200K tokens context
 - **Fast**: Low latency responses
 - **Easy setup**: Simple CLI authentication
 
 ## Limitations
 
-- **Cost**: Can be expensive for high-volume usage (pay-per-use)
 - **Internet required**: Must be online
-- **Subscription or usage-based**: Requires Claude account
+- **Requires Claude account**
 - **Privacy**: Data sent to Anthropic servers
 - **CLI required**: Must have Claude CLI installed
 
 ## Best Practices
 
-### Cost Optimization
+### Usage Optimization
 
 1. **Use appropriate models:**
    - Haiku for simple tasks
-   - Sonnet for balanced quality/cost
-   - Opus only when maximum quality needed
+   - Sonnet for balanced performance
+   - Opus for most complex tasks
 
 2. **Minimize context:**
    - Only include relevant context files
    - Avoid sending duplicate information
-
-3. **Monitor usage:**
-   - Check usage at https://console.anthropic.com/settings/usage
-   - Set up billing alerts
 
 ### Security
 
@@ -169,21 +151,8 @@ claude login
    - Keep your Claude CLI session secure
    - Log out on shared systems: `claude logout`
 
-2. **Monitor usage:**
-   - Check usage regularly at https://console.anthropic.com/settings/usage
-   - Set up billing alerts in your account
-
-3. **Privacy considerations:**
+2. **Privacy considerations:**
    - Data is sent to Anthropic servers
    - Review Anthropic's privacy policy for data handling details
 
-## Alternative: Use via GitHub Copilot
 
-If you have a GitHub Copilot subscription, you can access Claude models via the Copilot CLI:
-
-```bash
-# Use Copilot provider instead
-scripts/ask.sh copilot claude-sonnet-4.5 "Your prompt"
-```
-
-See `README-copilot.md` for details.

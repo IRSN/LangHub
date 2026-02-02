@@ -17,13 +17,13 @@ LangHub provides a simple, consistent interface to interact with multiple AI lan
 
 ### 1. Choose a Provider
 
-- **[Ollama](README-ollama.md)** - Free, local, good for testing
-- **[Claude](README-claude.md)** - Pay-per-use, excellent quality
-- **[Copilot](README-copilot.md)** - $10/month subscription, multiple models
+- **[Ollama](README-ollama.md)** - Local LLM runtime
+- **[Claude](README-claude.md)** - Anthropic Claude API
+- **[Copilot](README-copilot.md)** - GitHub Copilot CLI
 
 ### 2. Set Up Your Provider
 
-**Ollama (easiest to start):**
+**Ollama:**
 ```bash
 # Install Ollama
 ./lh install ollama
@@ -35,7 +35,7 @@ ollama pull qwen2.5-coder:7b
 ./lh login ollama
 ```
 
-**Claude (best quality):**
+**Claude:**
 ```bash
 # Install Claude CLI
 ./lh install claude
@@ -44,9 +44,9 @@ ollama pull qwen2.5-coder:7b
 ./lh login claude
 ```
 
-**Copilot (best value for high usage):**
+**Copilot:**
 ```bash
-# Subscribe at https://github.com/features/copilot ($10/month)
+# Subscribe at https://github.com/features/copilot
 
 # Install Copilot CLI
 ./lh install copilot
@@ -209,13 +209,13 @@ Current providers:
 ### Example 1: Simple Prompt
 
 ```bash
-# Using Ollama (free, local)
+# Using Ollama
 ./lh ask ollama qwen2.5-coder:7b "Write a Python function to calculate factorial"
 
-# Using Claude (best quality)
+# Using Claude
 ./lh ask claude claude-3-5-sonnet-20241022 "Explain quantum computing"
 
-# Using Copilot (unlimited usage)
+# Using Copilot
 ./lh ask copilot claude-sonnet-4.5 "Refactor this code for better performance"
 ```
 
@@ -335,29 +335,6 @@ langhub/
     ├── test-ask.sh          # Test ask scripts
     └── test-render.sh       # Test render script
 ```
-
-## Provider Comparison
-
-| Provider | Cost | Setup | Quality | Speed | Privacy |
-|----------|------|-------|---------|-------|---------|
-| **Ollama** | Free | Easy | Good | Fast | Excellent (local) |
-| **Claude** | Pay-per-use | Easy | Excellent | Fast | Good (cloud) |
-| **Copilot** | $10/month | Medium | Excellent | Fast | Good (cloud) |
-
-### Recommendations
-
-**For getting started:**
-- Use **Ollama** with `qwen2.5-coder:7b` (free, easy)
-
-**For production quality:**
-- Use **Claude** `claude-3-5-sonnet-20241022` (best quality)
-- Or **Copilot** `claude-sonnet-4.5` (fixed cost)
-
-**For high volume:**
-- Use **Copilot** (unlimited usage for $10/month)
-
-**For privacy/offline:**
-- Use **Ollama** (completely local)
 
 ## Dependencies
 
