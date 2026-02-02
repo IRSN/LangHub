@@ -23,41 +23,40 @@ LangHub provides a simple, consistent interface to interact with multiple AI lan
 
 ### 2. Set Up Your Provider
 
-Follow the setup instructions in the provider's README:
-
 **Ollama (easiest to start):**
 ```bash
-# Install and start Ollama
-brew install ollama  # or: curl -fsSL https://ollama.ai/install.sh | sh
+# Install Ollama
+./lh install ollama
+
+# Pull a model
 ollama pull qwen2.5-coder:7b
 
-# List models
-./lh list ollama
+# Check status and list models
+./lh login ollama
 ```
 
 **Claude (best quality):**
 ```bash
-# Install Claude CLI from https://docs.anthropic.com/claude/docs/claude-cli
-# Login to Claude
-claude login
+# Install Claude CLI
+./lh install claude
 
-# List models
-./lh list claude
+# Login to Claude (opens browser)
+./lh login claude
 ```
 
 **Copilot (best value for high usage):**
 ```bash
-# Subscribe at https://github.com/features/copilot
-# Install Copilot CLI and login
-copilot login
+# Subscribe at https://github.com/features/copilot ($10/month)
 
-# List models
-./lh list copilot
+# Install Copilot CLI
+./lh install copilot
+
+# Login to Copilot (opens browser)
+./lh login copilot
 ```
 
 ### 3. Use LangHub
 
-**Using the unified entrypoint (recommended):**
 ```bash
 # List available models
 ./lh list <engine>
@@ -69,11 +68,15 @@ copilot login
 ./lh render input.lmd > output.md
 ```
 
-**Or use individual scripts:**
+**Example workflow:**
 ```bash
-./list.sh <engine>
-./ask.sh <engine> <model-id> "Your prompt text"
-./render.sh input.lmd > output.md
+# Install and setup Ollama
+./lh install ollama
+ollama pull qwen2.5-coder:7b
+./lh login ollama
+
+# Use it
+./lh ask ollama qwen2.5-coder:7b "Write a hello world in Python"
 ```
 
 ## Installation
@@ -101,30 +104,100 @@ Then use it in your project:
 scripts/lh ask ollama qwen2.5-coder:7b "Your prompt"
 ```
 
+### Shell Completion
+
+LangHub provides shell completion for the `lh` command to make it easier to use. Completions are available for Bash, Zsh, and Fish shells.
+
+**Features:**
+- Command completion (`install`, `login`, `ask`, `list`, `render`, `help`)
+- Engine completion (`ollama`, `claude`, `copilot`, `all`)
+- Model completion (dynamically lists available models for each engine)
+- Option completion (`--context`, `--output`, `--log`)
+- File completion for `.lmd` files in `render` command
+
+**Installation:**
+
+**Bash:**
+```bash
+# Temporary (current session only)
+source completion/lh.bash
+
+# Permanent (add to ~/.bashrc)
+echo "source $(pwd)/completion/lh.bash" >> ~/.bashrc
+
+# System-wide (requires sudo)
+sudo cp completion/lh.bash /etc/bash_completion.d/lh
+```
+
+**Zsh:**
+```bash
+# Add to your fpath (add to ~/.zshrc)
+fpath=($(pwd)/completion $fpath)
+autoload -Uz compinit && compinit
+
+# Or copy to a standard location
+cp completion/lh.zsh /usr/local/share/zsh/site-functions/_lh
+```
+
+**Fish:**
+```bash
+# Copy to Fish completions directory
+mkdir -p ~/.config/fish/completions
+cp completion/lh.fish ~/.config/fish/completions/
+```
+
+**Usage:**
+
+After installation, you can use Tab to complete commands, engines, and models:
+
+```bash
+lh <Tab>              # Shows: install login ask list render help
+lh install <Tab>      # Shows: ollama claude copilot all
+lh ask ollama <Tab>   # Shows: available Ollama models
+lh ask claude <Tab>   # Shows: claude-sonnet-4-5, claude-3-5-sonnet-20241022, ...
+lh render <Tab>       # Shows: *.lmd files
+```
+
 ## Script Overview
 
 ### Unified Entrypoint
 
 - **`lh <command> [args...]`** - Main entrypoint for all LangHub commands
+  - `lh install <engine>` - Install an engine
+  - `lh login <engine>` - Login/authenticate with an engine
   - `lh list <engine>` - List available models
   - `lh ask <engine> <model-id> <prompt> [options]` - Prompt a model
   - `lh render <file.lmd>` - Process .lmd files
   - `lh help` - Show help message
 
-### Core Scripts
+### Installation Scripts
 
-You can also use the individual scripts directly:
+Main installer and provider-specific scripts:
 
-- **`list.sh <engine>`** - List available models for a provider
-- **`ask.sh <engine> <model-id> <prompt> [options]`** - Prompt a model
+- **`install.sh <engine>`** - Main installer (routes to provider scripts)
+- **`install_ollama.sh`** - Install Ollama (via `curl -fsSL https://ollama.com/install.sh | sh`)
+- **`install_claude.sh`** - Install Claude CLI (via `curl -fsSL https://claude.ai/install.sh | bash`)
+- **`install_copilot.sh`** - Install Copilot CLI (via `curl -fsSL https://gh.io/copilot-install | bash`)
+
+### Login Scripts
+
+Main login handler and provider-specific scripts:
+
+- **`login.sh <engine>`** - Main login handler (routes to provider scripts)
+- **`login_ollama.sh`** - Check Ollama status (no auth required)
+- **`login_claude.sh`** - Authenticate with Claude (via `claude login`)
+- **`login_copilot.sh`** - Authenticate with Copilot (via `copilot auth login`)
+
+### Usage Scripts
+
+Main scripts and provider-specific implementations:
+
+- **`list.sh <engine>`** - List available models (routes to provider)
+- **`ask.sh <engine> <model-id> <prompt> [options]`** - Prompt a model (routes to provider)
 - **`render.sh <file.lmd>`** - Process .lmd files to markdown
 
-### Provider Scripts
-
-Each provider has two scripts:
-
-- **`list_<engine>.sh`** - List models for that provider
-- **`ask_<engine>.sh`** - Prompt models for that provider
+Provider-specific scripts:
+- **`list_<engine>.sh`** / **`ask_<engine>.sh`** - Provider implementations
 
 Current providers:
 - `ollama` - Local Ollama models
@@ -229,24 +302,38 @@ langhub/
 │
 ├── lh                       # Unified entrypoint (recommended)
 │
+├── install.sh               # Main installer
+├── install_ollama.sh        # Ollama installer
+├── install_claude.sh        # Claude installer
+├── install_copilot.sh       # Copilot installer
+│
+├── login.sh                 # Main login handler
+├── login_ollama.sh          # Ollama status checker
+├── login_claude.sh          # Claude authenticator
+├── login_copilot.sh         # Copilot authenticator
+│
 ├── list.sh                  # Main: list models
+├── list_ollama.sh           # Ollama: list models
+├── list_claude.sh           # Claude: list models
+├── list_copilot.sh          # Copilot: list models
+│
 ├── ask.sh                   # Main: prompt models
+├── ask_ollama.sh            # Ollama: prompt models
+├── ask_claude.sh            # Claude: prompt models
+├── ask_copilot.sh           # Copilot: prompt models
+│
 ├── render.sh                # Main: process .lmd files
 │
-├── list_ollama.sh          # Ollama: list models
-├── ask_ollama.sh           # Ollama: prompt models
+├── completion/              # Shell completion scripts
+│   ├── lh.bash              # Bash completion
+│   ├── lh.zsh               # Zsh completion
+│   └── lh.fish              # Fish completion
 │
-├── list_claude.sh          # Claude: list models
-├── ask_claude.sh           # Claude: prompt models
-│
-├── list_copilot.sh         # Copilot: list models
-├── ask_copilot.sh          # Copilot: prompt models
-│
-└── test/                   # Test suite
-    ├── tests.sh            # Run all tests
-    ├── test-list.sh        # Test list scripts
-    ├── test-ask.sh         # Test ask scripts
-    └── test-render.sh      # Test render script
+└── test/                    # Test suite
+    ├── tests.sh             # Run all tests
+    ├── test-list.sh         # Test list scripts
+    ├── test-ask.sh          # Test ask scripts
+    └── test-render.sh       # Test render script
 ```
 
 ## Provider Comparison
@@ -339,14 +426,25 @@ See the provider README files for detailed troubleshooting:
 ./lh ask ollama:http://192.168.1.100:11434 qwen2.5-coder:7b "Your prompt"
 ```
 
-### Authentication
+### Installation and Authentication
 
 ```bash
-# Authenticate with providers (one-time setup)
-claude login      # For Claude
-copilot login     # For Copilot
+# Install engines
+./lh install ollama     # Install Ollama
+./lh install claude     # Install Claude CLI
+./lh install copilot    # Install Copilot CLI
+./lh install all        # Install all engines
 
-# Ollama usually doesn't need authentication (runs locally)
+# Authenticate with engines
+./lh login ollama       # Check Ollama status (no auth needed)
+./lh login claude       # Login to Claude (browser auth)
+./lh login copilot      # Login to Copilot (browser auth)
+./lh login all          # Login to all engines
+
+# Or use provider commands directly
+ollama pull qwen2.5-coder:7b   # Pull Ollama model
+claude login                    # Claude authentication
+copilot auth login              # Copilot authentication
 ```
 
 ### Batch Processing
@@ -363,11 +461,14 @@ done
 
 Contributions are welcome! To add a new provider:
 
-1. Create `list_<provider>.sh` and `ask_<provider>.sh`
-2. Update `list.sh` and `ask.sh` to include the new provider
-3. Create `README-<provider>.md` documentation
-4. Add tests in `test/test-ask.sh` and `test/test-list.sh`
-5. Submit a pull request
+1. Create `install_<provider>.sh` - Installation script
+2. Create `login_<provider>.sh` - Authentication script
+3. Create `list_<provider>.sh` - List models script
+4. Create `ask_<provider>.sh` - Prompt models script
+5. Update `install.sh`, `login.sh`, `list.sh`, and `ask.sh` to include the new provider
+6. Create `README-<provider>.md` - Provider documentation
+7. Add tests in `test/test-ask.sh` and `test/test-list.sh`
+8. Submit a pull request
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
