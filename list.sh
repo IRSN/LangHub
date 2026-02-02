@@ -8,35 +8,29 @@ set -e
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Discover available engines
+discover_engines() {
+    find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -name '[!.]*' ! -name 'test' ! -name 'completion' -printf '%f\n' | sort
+}
+
 # Check for required argument
 if [ $# -lt 1 ]; then
     # No argument - list all available engines
     echo "Available engines:"
     echo ""
 
-    # Try each engine and show results
-    echo "=== Ollama ==="
-    if "$SCRIPT_DIR/list_ollama.sh" 2>/dev/null; then
-        :
-    else
-        echo "(not available)"
-    fi
-    echo ""
-
-    echo "=== Claude ==="
-    if "$SCRIPT_DIR/list_claude.sh" 2>/dev/null; then
-        :
-    else
-        echo "(not available)"
-    fi
-    echo ""
-
-    echo "=== Copilot ==="
-    if "$SCRIPT_DIR/list_copilot.sh" 2>/dev/null; then
-        :
-    else
-        echo "(not available)"
-    fi
+    # Try each discovered engine and show results
+    while IFS= read -r engine; do
+        if [[ -f "$SCRIPT_DIR/$engine/list_${engine}.sh" ]]; then
+            echo "=== ${engine^} ==="
+            if "$SCRIPT_DIR/$engine/list_${engine}.sh" 2>/dev/null; then
+                :
+            else
+                echo "(not available)"
+            fi
+            echo ""
+        fi
+    done < <(discover_engines)
 
     exit 0
 fi
@@ -44,35 +38,36 @@ fi
 ENGINE_SPEC="$1"
 
 # Parse engine specification
-if [[ "$ENGINE_SPEC" == ollama:* ]]; then
-    ENGINE="ollama"
-    CUSTOM_URI="${ENGINE_SPEC#ollama:}"
-elif [[ "$ENGINE_SPEC" == "ollama" ]]; then
-    ENGINE="ollama"
-    CUSTOM_URI="http://localhost:11434"
-elif [[ "$ENGINE_SPEC" == "claude" ]]; then
-    ENGINE="claude"
-elif [[ "$ENGINE_SPEC" == "copilot" ]]; then
-    ENGINE="copilot"
+if [[ "$ENGINE_SPEC" == *:* ]]; then
+    # Custom URI syntax: engine:uri
+    ENGINE="${ENGINE_SPEC%%:*}"
+    CUSTOM_URI="${ENGINE_SPEC#*:}"
 else
+    ENGINE="$ENGINE_SPEC"
+    CUSTOM_URI=""
+fi
+
+# Special handling for ollama default URI
+if [[ "$ENGINE" == "ollama" ]] && [[ -z "$CUSTOM_URI" ]]; then
+    CUSTOM_URI="http://localhost:11434"
+fi
+
+# Validate engine exists
+if [[ ! -d "$SCRIPT_DIR/$ENGINE" ]]; then
     echo "Error: Unknown engine '$ENGINE_SPEC'" >&2
-    echo "Supported engines: ollama[:custom_uri], claude, copilot" >&2
+    engines=$(discover_engines | tr '\n' ', ' | sed 's/, $//')
+    echo "Available engines: $engines" >&2
     exit 1
 fi
 
 # Call engine-specific list script
-case "$ENGINE" in
-    ollama)
-        "$SCRIPT_DIR/list_ollama.sh" "$CUSTOM_URI"
-        ;;
-    claude)
-        "$SCRIPT_DIR/list_claude.sh"
-        ;;
-    copilot)
-        "$SCRIPT_DIR/list_copilot.sh"
-        ;;
-    *)
-        echo "Error: Engine '$ENGINE' not implemented" >&2
-        exit 1
-        ;;
-esac
+if [[ -f "$SCRIPT_DIR/$ENGINE/list_${ENGINE}.sh" ]]; then
+    if [[ -n "$CUSTOM_URI" ]]; then
+        "$SCRIPT_DIR/$ENGINE/list_${ENGINE}.sh" "$CUSTOM_URI"
+    else
+        "$SCRIPT_DIR/$ENGINE/list_${ENGINE}.sh"
+    fi
+else
+    echo "Error: Engine '$ENGINE' does not have a list script" >&2
+    exit 1
+fi

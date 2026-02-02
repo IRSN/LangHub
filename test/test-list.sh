@@ -57,11 +57,11 @@ fi
 
 # Test list_claude.sh
 info "Test 3: list_claude.sh execution"
-if ./list_claude.sh > /dev/null 2>&1; then
+if ./claude/list_claude.sh > /dev/null 2>&1; then
     pass "list_claude.sh executed successfully"
 
     # Check if it returns model list
-    OUTPUT=$(./list_claude.sh 2>/dev/null)
+    OUTPUT=$(./claude/list_claude.sh 2>/dev/null)
     if [ -n "$OUTPUT" ]; then
         pass "list_claude.sh returns model list"
     else
@@ -73,11 +73,11 @@ fi
 
 # Test list_copilot.sh
 info "Test 4: list_copilot.sh execution"
-if ./list_copilot.sh > /dev/null 2>&1; then
+if ./copilot/list_copilot.sh > /dev/null 2>&1; then
     pass "list_copilot.sh executed successfully"
 
     # Check if it returns model list
-    OUTPUT=$(./list_copilot.sh 2>/dev/null)
+    OUTPUT=$(./copilot/list_copilot.sh 2>/dev/null)
     if [ -n "$OUTPUT" ]; then
         pass "list_copilot.sh returns model list"
     else
@@ -89,11 +89,11 @@ fi
 
 # Test list_ollama.sh
 info "Test 5: list_ollama.sh execution"
-if ./list_ollama.sh > /dev/null 2>&1; then
+if ./ollama/list_ollama.sh > /dev/null 2>&1; then
     pass "list_ollama.sh executed successfully"
 
     # Check if it returns model list
-    OUTPUT=$(./list_ollama.sh 2>/dev/null)
+    OUTPUT=$(./ollama/list_ollama.sh 2>/dev/null)
     if [ -n "$OUTPUT" ]; then
         pass "list_ollama.sh returns model list"
     else
@@ -105,7 +105,7 @@ fi
 
 # Test list_ollama.sh with custom URI
 info "Test 6: list_ollama.sh with custom URI"
-if ./list_ollama.sh http://localhost:11434 > /dev/null 2>&1; then
+if ./ollama/list_ollama.sh http://localhost:11434 > /dev/null 2>&1; then
     pass "list_ollama.sh accepts custom URI"
 else
     skip "list_ollama.sh with custom URI failed (Ollama may not be running)"

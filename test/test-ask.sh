@@ -88,10 +88,10 @@ fi
 
 # Test ask_ollama.sh (if Ollama is available)
 info "Test 3: ask_ollama.sh execution"
-OLLAMA_MODELS=$(./list_ollama.sh 2>/dev/null | head -1)
+OLLAMA_MODELS=$(./ollama/list_ollama.sh 2>/dev/null | head -1)
 if [ -n "$OLLAMA_MODELS" ]; then
     FIRST_MODEL=$(echo "$OLLAMA_MODELS" | awk '{print $1}')
-    OUTPUT=$(./ask_ollama.sh "http://localhost:11434" "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
+    OUTPUT=$(./ollama/ask_ollama.sh "http://localhost:11434" "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
     if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
         pass "ask_ollama.sh can query models"
 
@@ -119,10 +119,10 @@ fi
 info "Test 4: ask_claude.sh execution"
 if command -v claude &> /dev/null; then
     # Try to get available models
-    CLAUDE_MODELS=$(./list_claude.sh 2>/dev/null | head -1)
+    CLAUDE_MODELS=$(./claude/list_claude.sh 2>/dev/null | head -1)
     if [ -n "$CLAUDE_MODELS" ]; then
         FIRST_MODEL=$(echo "$CLAUDE_MODELS" | awk '{print $1}')
-        OUTPUT=$(./ask_claude.sh "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
+        OUTPUT=$(./claude/ask_claude.sh "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
         if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
             pass "ask_claude.sh can query models"
 
@@ -153,10 +153,10 @@ fi
 info "Test 5: ask_copilot.sh execution"
 if command -v copilot &> /dev/null; then
     # Try to get available models
-    COPILOT_MODELS=$(./list_copilot.sh 2>/dev/null | head -1)
+    COPILOT_MODELS=$(./copilot/list_copilot.sh 2>/dev/null | head -1)
     if [ -n "$COPILOT_MODELS" ]; then
         FIRST_MODEL=$(echo "$COPILOT_MODELS" | awk '{print $1}')
-        OUTPUT=$(./ask_copilot.sh "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
+        OUTPUT=$(./copilot/ask_copilot.sh "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
         if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
             pass "ask_copilot.sh can query models"
 

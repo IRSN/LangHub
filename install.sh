@@ -32,19 +32,9 @@ print_warning() {
     echo -e "${YELLOW}!${NC} ${1}"
 }
 
-# Install Ollama
-install_ollama() {
-    "$SCRIPT_DIR/install_ollama.sh"
-}
-
-# Install Claude CLI
-install_claude() {
-    "$SCRIPT_DIR/install_claude.sh"
-}
-
-# Install GitHub Copilot CLI
-install_copilot() {
-    "$SCRIPT_DIR/install_copilot.sh"
+# Discover available engines
+discover_engines() {
+    find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 -type d -name '[!.]*' ! -name 'test' ! -name 'completion' -printf '%f\n' | sort
 }
 
 # Show usage
@@ -54,9 +44,11 @@ show_usage() {
     echo "Usage: ./install.sh [engine]"
     echo ""
     echo "Available engines:"
-    echo "  ollama    - Install Ollama (free, local)"
-    echo "  claude    - Install Claude CLI (pay-per-use or subscription)"
-    echo "  copilot   - Install GitHub Copilot CLI (subscription required)"
+    while IFS= read -r engine; do
+        if [[ -f "$SCRIPT_DIR/$engine/install_${engine}.sh" ]]; then
+            echo "  $engine"
+        fi
+    done < <(discover_engines)
     echo "  all       - Install all engines"
     echo ""
     echo "Examples:"
@@ -76,41 +68,34 @@ main() {
     local engine="$1"
     local failed=0
 
-    case "$engine" in
-        ollama)
-            install_ollama || failed=1
-            ;;
-        claude)
-            install_claude || failed=1
-            ;;
-        copilot)
-            install_copilot || failed=1
-            ;;
-        all)
-            print_header "Installing all engines..."
-            echo ""
-            install_ollama || failed=1
-            echo ""
-            install_claude || failed=1
-            echo ""
-            install_copilot || failed=1
-            echo ""
-            if [ $failed -eq 0 ]; then
-                print_success "All engines installed successfully!"
-            else
-                print_warning "Some engines require manual installation"
+    if [[ "$engine" == "all" ]]; then
+        print_header "Installing all engines..."
+        echo ""
+        
+        # Install all discovered engines
+        while IFS= read -r eng; do
+            if [[ -f "$SCRIPT_DIR/$eng/install_${eng}.sh" ]]; then
+                "$SCRIPT_DIR/$eng/install_${eng}.sh" || failed=1
+                echo ""
             fi
-            ;;
-        help|--help|-h)
-            show_usage
-            exit 0
-            ;;
-        *)
-            print_error "Unknown engine: $engine"
-            show_usage
-            exit 1
-            ;;
-    esac
+        done < <(discover_engines)
+        
+        if [ $failed -eq 0 ]; then
+            print_success "All engines installed successfully!"
+        else
+            print_warning "Some engines require manual installation"
+        fi
+    elif [[ "$engine" == "help" ]] || [[ "$engine" == "--help" ]] || [[ "$engine" == "-h" ]]; then
+        show_usage
+        exit 0
+    elif [[ -d "$SCRIPT_DIR/$engine" ]] && [[ -f "$SCRIPT_DIR/$engine/install_${engine}.sh" ]]; then
+        # Install specific engine
+        "$SCRIPT_DIR/$engine/install_${engine}.sh" || failed=1
+    else
+        print_error "Unknown engine: $engine"
+        show_usage
+        exit 1
+    fi
 
     if [ $failed -eq 0 ]; then
         echo ""
