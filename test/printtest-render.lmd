@@ -1,0 +1,15 @@
+# Test LMD file with log parameter
+
+## Simple print test
+
+```print
+Hello, this is a simple test output.
+This should appear in the markdown output.
+```
+
+## Test with log file
+
+```print, log=output/test.log
+This output has a log file specified.
+The log should be separate from the content.
+```

@@ -1,0 +1,13 @@
+# Test LMD file for Copilot
+
+## Simple Copilot test
+
+```copilot, model=claude-haiku-4.5
+What is 2+2? Answer with just the number.
+```
+
+## Copilot test with log file
+
+```copilot, model=claude-haiku-4.5, log=output/copilot-test.log
+List 3 colors, one per line.
+```

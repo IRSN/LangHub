@@ -1,0 +1,133 @@
+#!/bin/bash
+# Test script for render.sh
+
+set -e
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Test counter
+TESTS_PASSED=0
+TESTS_FAILED=0
+
+# Helper function to print test results
+pass() {
+    echo -e "${GREEN}✓${NC} $1"
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+}
+
+fail() {
+    echo -e "${RED}✗${NC} $1"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+}
+
+info() {
+    echo -e "${YELLOW}ℹ${NC} $1"
+}
+
+# Clean up any previous test outputs
+cleanup() {
+    rm -f printtest-render.md
+    rm -rf output/
+}
+
+# Setup
+echo "=== Testing render.sh ==="
+echo ""
+cleanup
+
+# Test 1: Basic execution
+info "Test 1: Basic execution with print engine"
+if ../render.sh printtest-render.lmd > printtest-render.md 2>/dev/null; then
+    pass "render.sh executed successfully"
+else
+    fail "render.sh failed to execute"
+fi
+
+# Test 2: Output file created
+info "Test 2: Check if markdown output was created"
+if [ -f "printtest-render.md" ]; then
+    pass "Markdown output file created"
+else
+    fail "Markdown output file not created"
+fi
+
+# Test 3: Log file created (and directory auto-created)
+info "Test 3: Check if log file was created"
+if [ -f "output/test.log" ]; then
+    pass "Log file created"
+else
+    fail "Log file not created"
+fi
+
+# Test 4: Log directory auto-created
+info "Test 4: Check if log directory was auto-created"
+if [ -d "output" ]; then
+    pass "Log directory auto-created"
+else
+    fail "Log directory not auto-created"
+fi
+
+# Test 5: Content verification
+info "Test 5: Verify output content is raw (no code blocks)"
+if grep -q '```' printtest-render.md; then
+    fail "Output contains code blocks (should be raw)"
+else
+    pass "Output is raw content (no code blocks)"
+fi
+
+# Test 5a: Check for no thinking blocks
+info "Test 5a: Verify output has no thinking blocks"
+if grep -q '<thinking>' printtest-render.md; then
+    fail "Output contains thinking blocks (should be clean answer only)"
+else
+    pass "Output is clean (no thinking blocks)"
+fi
+
+# Test 5b: Check for no logging info
+info "Test 5b: Verify output has no logging info"
+if grep -qE '(DEBUG|INFO|WARN|ERROR|Log:|Logging)' printtest-render.md; then
+    fail "Output contains logging info (should be clean answer only)"
+else
+    pass "Output is clean (no logging info)"
+fi
+
+# Test 6: Content correctness
+info "Test 6: Verify markdown content includes prompt output"
+if grep -q "Hello, this is a simple test output" printtest-render.md; then
+    pass "Markdown output contains expected content"
+else
+    fail "Markdown output missing expected content"
+fi
+
+# Test 7: Markdown structure preserved
+info "Test 7: Verify markdown headers preserved"
+if grep -q "## Simple print test" printtest-render.md && grep -q "## Test with log file" printtest-render.md; then
+    pass "Markdown headers preserved"
+else
+    fail "Markdown headers not preserved"
+fi
+
+# Clean up
+cleanup
+
+echo ""
+echo "=== Test Summary ==="
+echo -e "Passed: ${GREEN}${TESTS_PASSED}${NC}"
+echo -e "Failed: ${RED}${TESTS_FAILED}${NC}"
+echo ""
+
+if [ $TESTS_FAILED -eq 0 ]; then
+    echo -e "${GREEN}All tests passed!${NC}"
+    exit 0
+else
+    echo -e "${RED}Some tests failed.${NC}"
+    exit 1
+fi
