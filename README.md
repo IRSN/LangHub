@@ -233,21 +233,21 @@ Current providers:
 
 Create a `.lmd` file (e.g., `prompts.lmd`):
 
-```markdown
+````markdown
 # My Analysis
 
-\`\`\`ollama, model=qwen2.5-coder:7b, log=ollama.log
+```ollama, model=qwen2.5-coder:7b, log=ollama.log
 Provide a brief summary of the key features.
-\`\`\`
-
-\`\`\`claude, model=claude-3-5-sonnet-20241022, context=lib/, log=claude.log
-Analyze the code architecture and suggest improvements.
-\`\`\`
-
-\`\`\`copilot, model=claude-sonnet-4.5, context=lib/, log=copilot.log
-Generate comprehensive documentation for this codebase.
-\`\`\`
 ```
+
+```claude, model=claude-3-5-sonnet-20241022, context=lib/, log=claude.log
+Analyze the code architecture and suggest improvements.
+```
+
+```copilot, model=claude-sonnet-4.5, context=lib/, log=copilot.log
+Generate comprehensive documentation for this codebase.
+```
+````
 
 Process it:
 
@@ -264,11 +264,11 @@ This will:
 
 `.lmd` files are markdown files with special code blocks for LLM prompts:
 
-```markdown
-\`\`\`<engine>, model=<model-id>, context=<path>, log=<logfile>
+````markdown
+```<engine>, model=<model-id>, context=<path>, log=<logfile>
 <prompt text>
-\`\`\`
 ```
+````
 
 ### Parameters
 
