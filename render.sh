@@ -31,20 +31,38 @@ set -e
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Default: quiet mode (hide processing logs unless log= is specified)
+QUIET_MODE=true
+
 # Check for required argument
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <input.lmd> > output.md" >&2
+    echo "Usage: $0 <input.lmd> [--verbose] > output.md" >&2
     echo "  Processes a .lmd file and outputs markdown to stdout" >&2
+    echo "  --verbose : Show processing logs to stderr (default: quiet)" >&2
+    echo "  Note: Processing logs are always written to log files when log= is specified" >&2
     exit 1
 fi
 
 INPUT_FILE="$1"
 shift
 
-# Parse optional arguments (for future use)
+# Parse optional arguments
 while [[ $# -gt 0 ]]; do
-    echo "Unknown option: $1" >&2
-    exit 1
+    case "$1" in
+        --verbose|-v)
+            QUIET_MODE=false
+            shift
+            ;;
+        --quiet|-q)
+            # Legacy support - quiet is now the default
+            QUIET_MODE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+    esac
 done
 
 # Check input file exists
@@ -53,7 +71,9 @@ if [ ! -f "$INPUT_FILE" ]; then
     exit 1
 fi
 
-echo "Processing $INPUT_FILE..." >&2
+if [ "$QUIET_MODE" = false ]; then
+    echo "Processing $INPUT_FILE..." >&2
+fi
 
 # Temporary files for processing
 TEMP_FILE=$(mktemp)
@@ -157,13 +177,26 @@ while IFS= read -r line || [ -n "$line" ]; do
                 FULL_LOG_PATH=""
             fi
 
-            echo "" >&2
-            echo "=== Processing block $BLOCK_COUNT ===" >&2
-            echo "Engine: $ENGINE" >&2
-            echo "Model: $MODEL_ID" >&2
-            echo "Context: ${CONTEXT_PATH:-none}" >&2
-            echo "Log: ${FULL_LOG_PATH:-stderr}" >&2
-            echo "" >&2
+            # Write processing logs to log file if specified, otherwise respect QUIET_MODE
+            if [ -n "$FULL_LOG_PATH" ]; then
+                {
+                    echo ""
+                    echo "=== Processing block $BLOCK_COUNT ==="
+                    echo "Engine: $ENGINE"
+                    echo "Model: $MODEL_ID"
+                    echo "Context: ${CONTEXT_PATH:-none}"
+                    echo "Log: $FULL_LOG_PATH"
+                    echo ""
+                } >> "$FULL_LOG_PATH"
+            elif [ "$QUIET_MODE" = false ]; then
+                echo "" >&2
+                echo "=== Processing block $BLOCK_COUNT ===" >&2
+                echo "Engine: $ENGINE" >&2
+                echo "Model: $MODEL_ID" >&2
+                echo "Context: ${CONTEXT_PATH:-none}" >&2
+                echo "Log: stderr" >&2
+                echo "" >&2
+            fi
 
             # Build ask.sh command
             CMD=("$SCRIPT_DIR/ask.sh" "$ENGINE" "$MODEL_ID" "$PROMPT_TEXT")
@@ -178,21 +211,30 @@ while IFS= read -r line || [ -n "$line" ]; do
 
             # Redirect logs if specified
             if [ -n "$FULL_LOG_PATH" ]; then
-                if "${CMD[@]}" > "$MODEL_RESPONSE" 2> "$FULL_LOG_PATH"; then
-                    echo "✓ Block $BLOCK_COUNT completed successfully" >&2
+                if "${CMD[@]}" > "$MODEL_RESPONSE" 2>> "$FULL_LOG_PATH"; then
+                    echo "✓ Block $BLOCK_COUNT completed successfully" >> "$FULL_LOG_PATH"
                     EXECUTION_SUCCESS=true
                 else
-                    echo "✗ Block $BLOCK_COUNT failed" >&2
+                    echo "✗ Block $BLOCK_COUNT failed" >> "$FULL_LOG_PATH"
                     EXECUTION_SUCCESS=false
                 fi
             else
-                # No log file - let stderr pass through to parent's stderr
-                if "${CMD[@]}" > "$MODEL_RESPONSE" 2>&2; then
-                    echo "✓ Block $BLOCK_COUNT completed successfully" >&2
-                    EXECUTION_SUCCESS=true
+                # No log file - let stderr pass through to parent's stderr if not in quiet mode
+                if [ "$QUIET_MODE" = false ]; then
+                    if "${CMD[@]}" > "$MODEL_RESPONSE" 2>&2; then
+                        echo "✓ Block $BLOCK_COUNT completed successfully" >&2
+                        EXECUTION_SUCCESS=true
+                    else
+                        echo "✗ Block $BLOCK_COUNT failed" >&2
+                        EXECUTION_SUCCESS=false
+                    fi
                 else
-                    echo "✗ Block $BLOCK_COUNT failed" >&2
-                    EXECUTION_SUCCESS=false
+                    # Quiet mode - suppress stderr
+                    if "${CMD[@]}" > "$MODEL_RESPONSE" 2>/dev/null; then
+                        EXECUTION_SUCCESS=true
+                    else
+                        EXECUTION_SUCCESS=false
+                    fi
                 fi
             fi
 
@@ -222,9 +264,11 @@ while IFS= read -r line || [ -n "$line" ]; do
     fi
 done < "$INPUT_FILE"
 
-echo "" >&2
-echo "=== Processing complete ===" >&2
-echo "Processed $BLOCK_COUNT code block(s)" >&2
+if [ "$QUIET_MODE" = false ]; then
+    echo "" >&2
+    echo "=== Processing complete ===" >&2
+    echo "Processed $BLOCK_COUNT code block(s)" >&2
+fi
 
 # Output the processed markdown to stdout
 cat "$MARKDOWN_OUTPUT"
