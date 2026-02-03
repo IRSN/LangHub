@@ -16,32 +16,30 @@ if ! command -v copilot &> /dev/null; then
     exit 1
 fi
 
-# Read context files if specified
-CONTEXT=""
+# Build copilot command
+# Use -p/--prompt for non-interactive mode, --allow-all-tools to avoid prompts
+CMD=(copilot --prompt "$PROMPT_TEXT" --allow-all-tools)
+
+# Add context using --add-dir or --add-file options
 if [ -n "$CONTEXT_PATH" ]; then
     if [ -d "$CONTEXT_PATH" ]; then
-        # Read all markdown, text, and code files in directory
-        for file in "$CONTEXT_PATH"/*.md "$CONTEXT_PATH"/*.txt "$CONTEXT_PATH"/*.rst; do
-            if [ -f "$file" ]; then
-                CONTEXT+="$(cat "$file")"
-                CONTEXT+=$'\n\n'
-            fi
-        done
+        # Get absolute path for directory
+        abs_path="$(cd "$CONTEXT_PATH" && pwd)"
+        CMD+=(--add-dir "$abs_path")
     elif [ -f "$CONTEXT_PATH" ]; then
-        # Read single file
-        CONTEXT="$(cat "$CONTEXT_PATH")"
-        CONTEXT+=$'\n\n'
+        # Get absolute path for file
+        abs_path="$(cd "$(dirname "$CONTEXT_PATH")" && pwd)/$(basename "$CONTEXT_PATH")"
+        # For files, add the parent directory and reference the file in the prompt
+        parent_dir="$(dirname "$abs_path")"
+        CMD+=(--add-dir "$parent_dir")
+        # Prepend file reference to prompt
+        CMD[2]="The file $abs_path contains relevant context. Please read it before proceeding with this task:
+
+$PROMPT_TEXT"
     else
         echo "Warning: Context path '$CONTEXT_PATH' not found" >&2
     fi
 fi
-
-# Combine context and prompt
-FULL_PROMPT="${CONTEXT}${PROMPT_TEXT}"
-
-# Build copilot command
-# Use -p/--prompt for non-interactive mode, --allow-all-tools to avoid prompts
-CMD=(copilot --prompt "$FULL_PROMPT" --allow-all-tools)
 
 # Add model selection if specified
 if [ -n "$MODEL_ID" ]; then
