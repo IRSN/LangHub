@@ -1,0 +1,30 @@
+# Godiva Device OpenSCAD - Print Test
+
+## Print Generation
+
+```print, log=output/godiva-print.log
+// Godiva Device Test
+module test_core() {
+    cube([150, 100, 50]);
+}
+
+module test_housing() {
+    difference() {
+        cube([165, 115, 70]);
+        translate([2.5, 2.5, 2.5])
+            cube([160, 110, 67]);
+    }
+}
+
+module test_panel() {
+    difference() {
+        cube([100, 60, 3]);
+        translate([10, 10, -1])
+            cylinder(h=5, d=12);
+    }
+}
+
+test_core();
+translate([170, 0, 0]) test_housing();
+translate([340, 0, 0]) test_panel();
+```

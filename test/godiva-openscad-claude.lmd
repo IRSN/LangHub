@@ -1,0 +1,21 @@
+# Godiva Device OpenSCAD - Claude
+
+This test generates OpenSCAD models using Claude.
+
+## Claude Generation
+
+```claude, model=claude-haiku-4-5, context=lib/, log=output/godiva-claude.log
+Based on the technical documentation provided, generate a complete OpenSCAD script for a Godiva device.
+
+Requirements:
+- Use proper OpenSCAD syntax
+- Include parametric design with variables
+- Add comments explaining each section
+- Make dimensions based on specifications from the documentation
+- Include mounting points and connection interfaces
+- Use modules for reusability
+- Include three parts: core assembly, housing/shell, and control panel
+- Add a final assembly module showing all parts in position
+
+Generate only the OpenSCAD code, no explanations outside comments.
+```

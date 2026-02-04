@@ -9,8 +9,12 @@ on:
 
 jobs:
   test-openscad-godiva:
-    name: Test Godiva OpenSCAD Dataset
-    runs-on: [self-hosted, ollama, claude, copilot]
+    name: Test Godiva OpenSCAD with ${{ matrix.engine }}
+    runs-on: [self-hosted, ${{ matrix.engine }}]
+    strategy:
+      matrix:
+        engine: [ollama, claude, copilot]
+      fail-fast: false
     
     steps:
       - name: Checkout code
@@ -19,47 +23,29 @@ jobs:
       - name: Make scripts executable
         run: chmod +x *.sh lh test/*.sh
       
-## Assuming authentication is handled by the self-hosted runner
-#        - name: Check all engines status
-#        run: |
-#          echo "=== Checking Ollama ==="
-#          ./lh login ollama
-#          echo ""
-#          echo "=== Checking Claude ==="
-#          ./lh login claude
-#          echo ""
-#          echo "=== Checking Copilot ==="
-#          ./lh login copilot
+      - name: Check ${{ matrix.engine }} status
+        run: ./lh login ${{ matrix.engine }}
       
-      - name: List all engines models
-        run: |
-          echo "=== Ollama Models ==="
-          ./lh list ollama
-          echo ""
-          echo "=== Claude Models ==="
-          ./lh list claude
-          echo ""
-          echo "=== Copilot Models ==="
-          ./lh list copilot
+      - name: List ${{ matrix.engine }} models
+        run: ./lh list ${{ matrix.engine }}
       
-      - name: Ensure Ollama model available
+      - name: Ensure Ollama model (if ollama)
+        if: matrix.engine == 'ollama'
         run: |
           if ! ollama list | grep -q qwen2.5-coder:7b; then
             echo "Pulling qwen2.5-coder:7b model..."
             ollama pull qwen2.5-coder:7b
           fi
       
-      - name: Run Godiva OpenSCAD generation tests
-        run: cd test && bash godiva-openscad-test-render.sh
+      - name: Run Godiva OpenSCAD generation test
+        run: cd test && bash godiva-openscad-${{ matrix.engine }}.sh
       
       - name: Upload generated OpenSCAD artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: openscad-godiva-all-engines
+          name: openscad-godiva-${{ matrix.engine }}
           path: |
-            test/godiva-openscad-ollama.md
-            test/godiva-openscad-claude.md
-            test/godiva-openscad-copilot.md
-            test/output/godiva-*.log
+            test/godiva-openscad-${{ matrix.engine }}.md
+            test/output/godiva-${{ matrix.engine }}.log
           retention-days: 30
