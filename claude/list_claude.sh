@@ -11,48 +11,49 @@ if ! command -v claude &> /dev/null; then
     exit 1
 fi
 
-# Fetch available models from Anthropic docs
-# Parse the models overview page to extract model IDs
-models_html=$(curl -s "https://platform.claude.com/docs/en/about-claude/models/overview" 2>&1)
+# Fetch model configuration from official Claude Code documentation
+DOC_URL="https://code.claude.com/docs/en/model-config.md"
+DOC_CONTENT=$(curl -s "$DOC_URL" 2>&1)
 
-if [ $? -eq 0 ] && [ -n "$models_html" ]; then
-    # Extract model IDs from the page
-    # Look for patterns like claude-X-Y-YYYYMMDD or claude-X-Y
-    models=$(echo "$models_html" | grep -oE 'claude-[a-z0-9-]+' | sort -u)
-
-    if [ -n "$models" ]; then
-        echo "$models"
-        # Also add common aliases
-        echo "sonnet"
-        echo "opus"
-        echo "haiku"
-    else
-        # Fallback to known models if parsing fails
-        echo "Warning: Could not parse models from docs, using fallback list" >&2
-        cat <<EOF
-claude-sonnet-4-5-20250929
-claude-haiku-4-5-20251001
-claude-opus-4-5-20251101
-claude-sonnet-4-5
-claude-haiku-4-5
-claude-opus-4-5
-sonnet
-opus
-haiku
-EOF
+if [ $? -eq 0 ] && [ -n "$DOC_CONTENT" ]; then
+    # Extract model aliases from the table
+    # Look for lines like: | **`sonnet`** | description
+    ALIASES=$(echo "$DOC_CONTENT" | grep -E '^\|.*\*\*`[^`]+`\*\*' | grep -oE '`[^`]+`' | tr -d '`' | sort -u)
+    
+    # Extract full model names (e.g., claude-sonnet-4-5-20250929)
+    FULL_MODELS=$(echo "$DOC_CONTENT" | grep -oE 'claude-[a-z0-9]+-[0-9]+-[0-9]+-[0-9]{8}' | sort -u)
+    
+    # Also extract simplified forms like claude-sonnet-4-5
+    SIMPLE_MODELS=$(echo "$DOC_CONTENT" | grep -oE 'claude-[a-z0-9]+-[0-9]+-[0-9]+' | grep -v '[0-9]{8}' | sort -u)
+    
+    # Combine all results
+    ALL_MODELS=$(echo -e "$ALIASES\n$FULL_MODELS\n$SIMPLE_MODELS" | grep -v '^$' | sort -u)
+    
+    if [ -n "$ALL_MODELS" ]; then
+        echo "$ALL_MODELS"
+        exit 0
     fi
-else
-    # Network error or other issue - use fallback
-    echo "Warning: Could not fetch models from docs, using fallback list" >&2
-    cat <<EOF
-claude-sonnet-4-5-20250929
-claude-haiku-4-5-20251001
-claude-opus-4-5-20251101
-claude-sonnet-4-5
-claude-haiku-4-5
-claude-opus-4-5
+fi
+
+# Fallback: try to extract from claude --help
+HELP_OUTPUT=$(claude --help 2>&1)
+HELP_MODELS=$(echo "$HELP_OUTPUT" | grep -oE "'(claude-[a-z0-9-]+|sonnet|opus|haiku)'" | tr -d "'" | sort -u)
+
+if [ -n "$HELP_MODELS" ]; then
+    echo "$HELP_MODELS"
+    exit 0
+fi
+
+# Last resort: hardcoded list (updated as of Feb 2025)
+echo "Warning: Using fallback model list" >&2
+cat <<EOF
+claude-3-7-sonnet-20250219
+claude-3-7-sonnet
+claude-3-haiku-20240307
+claude-3-haiku
 sonnet
 opus
 haiku
+default
+opusplan
 EOF
-fi
