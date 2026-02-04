@@ -10,6 +10,14 @@ PROMPT_TEXT="$3"
 CONTEXT_PATH="$4"
 shift 4
 
+# Determine if we should bypass proxy for localhost
+# Check if URI is localhost/127.0.0.1
+CURL_OPTS=()
+if [[ "$URI" =~ ^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?(/.*)?$ ]]; then
+    # Using localhost URI - bypass proxy to avoid connection issues
+    CURL_OPTS+=(--noproxy "*")
+fi
+
 # Read context files if specified
 CONTEXT=""
 if [ -n "$CONTEXT_PATH" ]; then
@@ -46,7 +54,7 @@ EOF
 )
 
 # Make API request
-response=$(curl -s -X POST "$URI/api/generate" \
+response=$(curl -s "${CURL_OPTS[@]}" -X POST "$URI/api/generate" \
     -H "Content-Type: application/json" \
     -d "$PAYLOAD" 2>&1)
 
