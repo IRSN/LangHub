@@ -1,0 +1,35 @@
+name: Test Ollama
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-ollama:
+    name: Test Ollama Engine
+    runs-on: [self-hosted, ollama]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Make scripts executable
+        run: chmod +x *.sh lh
+      
+      - name: Check Ollama status
+        run: ./lh login ollama
+      
+      - name: List Ollama models
+        run: ./lh list ollama
+      
+      - name: Run Ollama tests
+        run: cd test && bash test-list.sh
+      
+      - name: Run Ollama ask tests
+        run: cd test && bash test-ask.sh
+      
+      - name: Run render tests
+        run: cd test && bash test-render.sh

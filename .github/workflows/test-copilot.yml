@@ -1,0 +1,35 @@
+name: Test Copilot
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-copilot:
+    name: Test Copilot Engine
+    runs-on: [self-hosted, copilot]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Make scripts executable
+        run: chmod +x *.sh lh
+      
+      - name: Check Copilot authentication
+        run: ./lh login copilot
+      
+      - name: List Copilot models
+        run: ./lh list copilot
+      
+      - name: Run Copilot tests
+        run: cd test && bash test-list.sh
+      
+      - name: Run Copilot ask tests
+        run: cd test && bash test-ask.sh
+      
+      - name: Run render tests
+        run: cd test && bash test-render.sh

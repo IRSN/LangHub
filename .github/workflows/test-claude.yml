@@ -1,0 +1,35 @@
+name: Test Claude
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-claude:
+    name: Test Claude Engine
+    runs-on: [self-hosted, claude]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Make scripts executable
+        run: chmod +x *.sh lh
+      
+      - name: Check Claude authentication
+        run: ./lh login claude
+      
+      - name: List Claude models
+        run: ./lh list claude
+      
+      - name: Run Claude tests
+        run: cd test && bash test-list.sh
+      
+      - name: Run Claude ask tests
+        run: cd test && bash test-ask.sh
+      
+      - name: Run render tests
+        run: cd test && bash test-render.sh
