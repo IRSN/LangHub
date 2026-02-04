@@ -7,6 +7,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Engine filter (optional argument) - render tests all engines in .lmd files
+ENGINE_FILTER="${1:-all}"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -34,18 +37,31 @@ info() {
 
 # Clean up any previous test outputs
 cleanup() {
-    rm -f printtest-render.md
+    rm -f printtest-render.md claudetest-render.md copilottest-render.md ollamatest-render.md
     rm -rf output/
 }
 
 # Setup
-echo "=== Testing render.sh ==="
+echo "=== Testing render.sh (engine: $ENGINE_FILTER) ==="
 echo ""
 cleanup
 
+# Determine which test file to use based on engine filter
+if [ "$ENGINE_FILTER" = "ollama" ]; then
+    TEST_FILE="ollamatest-render.lmd"
+elif [ "$ENGINE_FILTER" = "claude" ]; then
+    TEST_FILE="claudetest-render.lmd"
+elif [ "$ENGINE_FILTER" = "copilot" ]; then
+    TEST_FILE="copilottest-render.lmd"
+else
+    TEST_FILE="printtest-render.lmd"
+fi
+
+OUTPUT_FILE="${TEST_FILE%.lmd}.md"
+
 # Test 1: Basic execution
-info "Test 1: Basic execution with print engine"
-if ../render.sh printtest-render.lmd > printtest-render.md 2>/dev/null; then
+info "Test 1: Basic execution with $ENGINE_FILTER engine"
+if ../render.sh "$TEST_FILE" > "$OUTPUT_FILE" 2>/dev/null; then
     pass "render.sh executed successfully"
 else
     fail "render.sh failed to execute"
@@ -53,31 +69,33 @@ fi
 
 # Test 2: Output file created
 info "Test 2: Check if markdown output was created"
-if [ -f "printtest-render.md" ]; then
+if [ -f "$OUTPUT_FILE" ]; then
     pass "Markdown output file created"
 else
     fail "Markdown output file not created"
 fi
 
-# Test 3: Log file created (and directory auto-created)
-info "Test 3: Check if log file was created"
-if [ -f "output/test.log" ]; then
-    pass "Log file created"
-else
-    fail "Log file not created"
-fi
+# Test 3: Log file created (only for printtest which has log directive)
+if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
+    info "Test 3: Check if log file was created"
+    if [ -f "output/test.log" ]; then
+        pass "Log file created"
+    else
+        fail "Log file not created"
+    fi
 
-# Test 4: Log directory auto-created
-info "Test 4: Check if log directory was auto-created"
-if [ -d "output" ]; then
-    pass "Log directory auto-created"
-else
-    fail "Log directory not auto-created"
+    # Test 4: Log directory auto-created
+    info "Test 4: Check if log directory was auto-created"
+    if [ -d "output" ]; then
+        pass "Log directory auto-created"
+    else
+        fail "Log directory not auto-created"
+    fi
 fi
 
 # Test 5: Content verification
 info "Test 5: Verify output content is raw (no code blocks)"
-if grep -q '```' printtest-render.md; then
+if grep -q '```' "$OUTPUT_FILE"; then
     fail "Output contains code blocks (should be raw)"
 else
     pass "Output is raw content (no code blocks)"
@@ -85,7 +103,7 @@ fi
 
 # Test 5a: Check for no thinking blocks
 info "Test 5a: Verify output has no thinking blocks"
-if grep -q '<thinking>' printtest-render.md; then
+if grep -q '<thinking>' "$OUTPUT_FILE"; then
     fail "Output contains thinking blocks (should be clean answer only)"
 else
     pass "Output is clean (no thinking blocks)"
@@ -93,26 +111,28 @@ fi
 
 # Test 5b: Check for no logging info
 info "Test 5b: Verify output has no logging info"
-if grep -qE '(DEBUG|INFO|WARN|ERROR|Log:|Logging)' printtest-render.md; then
+if grep -qE '(DEBUG|INFO|WARN|ERROR|Log:|Logging)' "$OUTPUT_FILE"; then
     fail "Output contains logging info (should be clean answer only)"
 else
     pass "Output is clean (no logging info)"
 fi
 
-# Test 6: Content correctness
-info "Test 6: Verify markdown content includes prompt output"
-if grep -q "Hello, this is a simple test output" printtest-render.md; then
-    pass "Markdown output contains expected content"
-else
-    fail "Markdown output missing expected content"
-fi
+# Test 6: Content correctness (only for printtest)
+if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
+    info "Test 6: Verify markdown content includes prompt output"
+    if grep -q "Hello, this is a simple test output" "$OUTPUT_FILE"; then
+        pass "Markdown output contains expected content"
+    else
+        fail "Markdown output missing expected content"
+    fi
 
-# Test 7: Markdown structure preserved
-info "Test 7: Verify markdown headers preserved"
-if grep -q "## Simple print test" printtest-render.md && grep -q "## Test with log file" printtest-render.md; then
-    pass "Markdown headers preserved"
-else
-    fail "Markdown headers not preserved"
+    # Test 7: Markdown structure preserved
+    info "Test 7: Verify markdown headers preserved"
+    if grep -q "## Simple print test" "$OUTPUT_FILE" && grep -q "## Test with log file" "$OUTPUT_FILE"; then
+        pass "Markdown headers preserved"
+    else
+        fail "Markdown headers not preserved"
+    fi
 fi
 
 # Clean up

@@ -7,6 +7,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Engine filter (optional argument)
+ENGINE_FILTER="${1:-all}"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -16,6 +19,7 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Running All Script Tests${NC}"
+echo -e "${BLUE}  Engine filter: $ENGINE_FILTER${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
@@ -28,7 +32,7 @@ SUITES_FAILED=0
 # Run test-render.sh
 echo -e "${BLUE}[1/3] Running render.sh tests...${NC}"
 echo ""
-if bash test-render.sh; then
+if bash test-render.sh "$ENGINE_FILTER"; then
     SUITES_PASSED=$((SUITES_PASSED + 1))
     echo ""
 else
@@ -39,7 +43,7 @@ fi
 # Run test-list.sh
 echo -e "${BLUE}[2/3] Running list scripts tests...${NC}"
 echo ""
-if bash test-list.sh; then
+if bash test-list.sh "$ENGINE_FILTER"; then
     SUITES_PASSED=$((SUITES_PASSED + 1))
     echo ""
 else
@@ -50,7 +54,7 @@ fi
 # Run test-ask.sh
 echo -e "${BLUE}[3/3] Running ask scripts tests...${NC}"
 echo ""
-if bash test-ask.sh; then
+if bash test-ask.sh "$ENGINE_FILTER"; then
     SUITES_PASSED=$((SUITES_PASSED + 1))
     echo ""
 else

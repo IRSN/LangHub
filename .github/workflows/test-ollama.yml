@@ -18,18 +18,13 @@ jobs:
       
       - name: Make scripts executable
         run: chmod +x *.sh lh
-      
-      - name: Check Ollama status
-        run: ./lh login ollama
+
+## Assuming authentication is handled by the self-hosted runner        
+#      - name: Check Ollama status
+#        run: ./lh login ollama
       
       - name: List Ollama models
         run: ./lh list ollama
       
       - name: Run Ollama tests
-        run: cd test && bash test-list.sh
-      
-      - name: Run Ollama ask tests
-        run: cd test && bash test-ask.sh
-      
-      - name: Run render tests
-        run: cd test && bash test-render.sh
+        run: cd test && bash tests.sh ollama

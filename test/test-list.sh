@@ -7,6 +7,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
+# Engine filter (optional argument)
+ENGINE_FILTER="${1:-all}"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -36,79 +39,87 @@ skip() {
     echo -e "${YELLOW}⊘${NC} $1 (skipped)"
 }
 
-echo "=== Testing list scripts ==="
+echo "=== Testing list scripts (engine: $ENGINE_FILTER) ==="
 echo ""
 
 # Test list.sh
-info "Test 1: list.sh basic execution"
-if ./list.sh > /dev/null 2>&1; then
-    pass "list.sh executed successfully"
-else
-    fail "list.sh failed to execute"
-fi
+if [ "$ENGINE_FILTER" = "all" ]; then
+    info "Test 1: list.sh basic execution"
+    if ./list.sh > /dev/null 2>&1; then
+        pass "list.sh executed successfully"
+    else
+        fail "list.sh failed to execute"
+    fi
 
-info "Test 2: list.sh output format"
-OUTPUT=$(./list.sh 2>/dev/null)
-if echo "$OUTPUT" | grep -q "Available engines"; then
-    pass "list.sh shows available engines"
-else
-    fail "list.sh output format incorrect"
+    info "Test 2: list.sh output format"
+    OUTPUT=$(./list.sh 2>/dev/null)
+    if echo "$OUTPUT" | grep -q "Available engines"; then
+        pass "list.sh shows available engines"
+    else
+        fail "list.sh output format incorrect"
+    fi
 fi
 
 # Test list_claude.sh
-info "Test 3: list_claude.sh execution"
-if ./claude/list_claude.sh > /dev/null 2>&1; then
-    pass "list_claude.sh executed successfully"
+if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "claude" ]; then
+    info "Test 3: list_claude.sh execution"
+    if ./claude/list_claude.sh > /dev/null 2>&1; then
+        pass "list_claude.sh executed successfully"
 
-    # Check if it returns model list
-    OUTPUT=$(./claude/list_claude.sh 2>/dev/null)
-    if [ -n "$OUTPUT" ]; then
-        pass "list_claude.sh returns model list"
+        # Check if it returns model list
+        OUTPUT=$(./claude/list_claude.sh 2>/dev/null)
+        if [ -n "$OUTPUT" ]; then
+            pass "list_claude.sh returns model list"
+        else
+            fail "list_claude.sh returns empty output"
+        fi
     else
-        fail "list_claude.sh returns empty output"
+        skip "list_claude.sh failed (Claude API may not be configured)"
     fi
-else
-    skip "list_claude.sh failed (Claude API may not be configured)"
 fi
 
 # Test list_copilot.sh
-info "Test 4: list_copilot.sh execution"
-if ./copilot/list_copilot.sh > /dev/null 2>&1; then
-    pass "list_copilot.sh executed successfully"
+if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "copilot" ]; then
+    info "Test 4: list_copilot.sh execution"
+    if ./copilot/list_copilot.sh > /dev/null 2>&1; then
+        pass "list_copilot.sh executed successfully"
 
-    # Check if it returns model list
-    OUTPUT=$(./copilot/list_copilot.sh 2>/dev/null)
-    if [ -n "$OUTPUT" ]; then
-        pass "list_copilot.sh returns model list"
+        # Check if it returns model list
+        OUTPUT=$(./copilot/list_copilot.sh 2>/dev/null)
+        if [ -n "$OUTPUT" ]; then
+            pass "list_copilot.sh returns model list"
+        else
+            fail "list_copilot.sh returns empty output"
+        fi
     else
-        fail "list_copilot.sh returns empty output"
+        skip "list_copilot.sh failed (GitHub Copilot may not be configured)"
     fi
-else
-    skip "list_copilot.sh failed (GitHub Copilot may not be configured)"
 fi
 
 # Test list_ollama.sh
-info "Test 5: list_ollama.sh execution"
-if ./ollama/list_ollama.sh > /dev/null 2>&1; then
-    pass "list_ollama.sh executed successfully"
+if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "ollama" ]; then
+    info "Test 5: list_ollama.sh execution"
+    if ./ollama/list_ollama.sh > /dev/null 2>&1; then
+        pass "list_ollama.sh executed successfully"
 
-    # Check if it returns model list
-    OUTPUT=$(./ollama/list_ollama.sh 2>/dev/null)
-    if [ -n "$OUTPUT" ]; then
-        pass "list_ollama.sh returns model list"
+        # Check if it returns model list
+        OUTPUT=$(./ollama/list_ollama.sh 2>/dev/null)
+        if [ -n "$OUTPUT" ]; then
+            pass "list_ollama.sh returns model list"
+        else
+            fail "list_ollama.sh returns empty output"
+        fi
     else
-        fail "list_ollama.sh returns empty output"
+        skip "list_ollama.sh failed (Ollama may not be running)"
     fi
-else
-    skip "list_ollama.sh failed (Ollama may not be running)"
-fi
 
-# Test list_ollama.sh with custom URI
-info "Test 6: list_ollama.sh with custom URI"
-if ./ollama/list_ollama.sh http://localhost:11434 > /dev/null 2>&1; then
-    pass "list_ollama.sh accepts custom URI"
-else
-    skip "list_ollama.sh with custom URI failed (Ollama may not be running)"
+    # Test list_ollama.sh with custom URI
+    info "Test 6: list_ollama.sh with custom URI"
+    if ./ollama/list_ollama.sh http://localhost:11434 > /dev/null 2>&1; then
+        pass "list_ollama.sh accepts custom URI"
+    else
+        skip "list_ollama.sh with custom URI failed (Ollama may not be running)"
+    fi
 fi
 
 echo ""

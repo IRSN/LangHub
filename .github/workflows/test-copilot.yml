@@ -18,18 +18,13 @@ jobs:
       
       - name: Make scripts executable
         run: chmod +x *.sh lh
-      
-      - name: Check Copilot authentication
-        run: ./lh login copilot
+
+## Assuming authentication is handled by the self-hosted runner        
+#      - name: Check Copilot authentication
+#        run: ./lh login copilot
       
       - name: List Copilot models
         run: ./lh list copilot
       
       - name: Run Copilot tests
-        run: cd test && bash test-list.sh
-      
-      - name: Run Copilot ask tests
-        run: cd test && bash test-ask.sh
-      
-      - name: Run render tests
-        run: cd test && bash test-render.sh
+        run: cd test && bash tests.sh copilot
