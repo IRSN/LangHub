@@ -18,20 +18,28 @@ fi
 
 # Build copilot command
 # Use -p/--prompt for non-interactive mode, --allow-all-tools to avoid prompts
-CMD=(copilot --prompt "$PROMPT_TEXT" --allow-all-tools)
+# Add current directory by default to avoid permission prompts
+CURRENT_DIR="$(pwd)"
+CMD=(copilot --prompt "$PROMPT_TEXT" --allow-all-tools --add-dir "$CURRENT_DIR")
 
 # Add context using --add-dir or --add-file options
 if [ -n "$CONTEXT_PATH" ]; then
     if [ -d "$CONTEXT_PATH" ]; then
         # Get absolute path for directory
         abs_path="$(cd "$CONTEXT_PATH" && pwd)"
-        CMD+=(--add-dir "$abs_path")
+        # Only add if it's different from current directory
+        if [ "$abs_path" != "$CURRENT_DIR" ]; then
+            CMD+=(--add-dir "$abs_path")
+        fi
     elif [ -f "$CONTEXT_PATH" ]; then
         # Get absolute path for file
         abs_path="$(cd "$(dirname "$CONTEXT_PATH")" && pwd)/$(basename "$CONTEXT_PATH")"
         # For files, add the parent directory and reference the file in the prompt
         parent_dir="$(dirname "$abs_path")"
-        CMD+=(--add-dir "$parent_dir")
+        # Only add if parent directory is different from current directory
+        if [ "$parent_dir" != "$CURRENT_DIR" ]; then
+            CMD+=(--add-dir "$parent_dir")
+        fi
         # Prepend file reference to prompt
         CMD[2]="The file $abs_path contains relevant context. Please read it before proceeding with this task:
 
@@ -50,12 +58,12 @@ fi
 CMD+=("$@")
 
 # Execute copilot command and filter output
-# Redirect stdin to /dev/null to prevent consuming parent script's stdin
+# Auto-answer 'y' to directory permission prompts
 # Filter out execution log lines (lines starting with ✓, ✗, $, ↪, or other tool output markers)
 TEMP_OUTPUT=$(mktemp)
 trap "rm -f $TEMP_OUTPUT" EXIT
 
-if ! "${CMD[@]}" </dev/null > "$TEMP_OUTPUT" 2>&1; then
+if ! echo "y" | "${CMD[@]}" > "$TEMP_OUTPUT" 2>&1; then
     # On error, show the full output to stderr
     cat "$TEMP_OUTPUT" >&2
     echo "Error: copilot command failed" >&2
