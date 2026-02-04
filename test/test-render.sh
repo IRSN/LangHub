@@ -71,6 +71,8 @@ fi
 info "Test 2: Check if markdown output was created"
 if [ -f "$OUTPUT_FILE" ]; then
     pass "Markdown output file created"
+    echo "   Content (first 10 lines):"
+    head -10 "$OUTPUT_FILE" | sed 's/^/     /'
 else
     fail "Markdown output file not created"
 fi
@@ -80,6 +82,8 @@ if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
     info "Test 3: Check if log file was created"
     if [ -f "output/test.log" ]; then
         pass "Log file created"
+        echo "   Log content (first 10 lines):"
+        head -10 output/test.log | sed 's/^/     /'
     else
         fail "Log file not created"
     fi

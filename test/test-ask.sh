@@ -57,6 +57,8 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "print" ]; then
     OUTPUT=$(./ask.sh print "" "$TEST_PROMPT" 2>/dev/null || echo "FAILED")
     if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
         pass "ask.sh with print engine works"
+        echo "   Output (first 10 lines):"
+        echo "$OUTPUT" | head -10 | sed 's/^/     /'
 
         if [ "$OUTPUT" = "$TEST_PROMPT" ]; then
             pass "Print engine echoes prompt correctly"
@@ -100,6 +102,9 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "ollama" ]; then
         OUTPUT=$(./ollama/ask_ollama.sh "http://localhost:11434" "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
         if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
             pass "ask_ollama.sh can query models"
+            echo "   Model: $FIRST_MODEL"
+            echo "   Response (first 10 lines):"
+            echo "$OUTPUT" | head -10 | sed 's/^/     /'
 
             # Check for no thinking blocks
             if echo "$OUTPUT" | grep -q '<thinking>'; then
@@ -133,6 +138,9 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "claude" ]; then
             OUTPUT=$(./claude/ask_claude.sh "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
             if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
                 pass "ask_claude.sh can query models"
+                echo "   Model: $FIRST_MODEL"
+                echo "   Response (first 10 lines):"
+                echo "$OUTPUT" | head -10 | sed 's/^/     /'
 
                 # Check for no thinking blocks
                 if echo "$OUTPUT" | grep -q '<thinking>'; then
@@ -169,6 +177,9 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "copilot" ]; then
             OUTPUT=$(./copilot/ask_copilot.sh "$FIRST_MODEL" "Say 'test'" "" 2>/dev/null || echo "FAILED")
             if [ "$OUTPUT" != "FAILED" ] && [ -n "$OUTPUT" ]; then
                 pass "ask_copilot.sh can query models"
+                echo "   Model: $FIRST_MODEL"
+                echo "   Response (first 10 lines):"
+                echo "$OUTPUT" | head -10 | sed 's/^/     /'
 
                 # Check for no thinking blocks
                 if echo "$OUTPUT" | grep -q '<thinking>'; then

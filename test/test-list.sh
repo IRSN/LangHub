@@ -55,6 +55,8 @@ if [ "$ENGINE_FILTER" = "all" ]; then
     OUTPUT=$(./list.sh 2>/dev/null)
     if echo "$OUTPUT" | grep -q "Available engines"; then
         pass "list.sh shows available engines"
+        echo "   Output (first 10 lines):"
+        echo "$OUTPUT" | head -10 | sed 's/^/     /'
     else
         fail "list.sh output format incorrect"
     fi
@@ -70,6 +72,8 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "claude" ]; then
         OUTPUT=$(./claude/list_claude.sh 2>/dev/null)
         if [ -n "$OUTPUT" ]; then
             pass "list_claude.sh returns model list"
+            echo "   Models (first 10 lines):"
+            echo "$OUTPUT" | head -10 | sed 's/^/     /'
         else
             fail "list_claude.sh returns empty output"
         fi
@@ -88,6 +92,8 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "copilot" ]; then
         OUTPUT=$(./copilot/list_copilot.sh 2>/dev/null)
         if [ -n "$OUTPUT" ]; then
             pass "list_copilot.sh returns model list"
+            echo "   Models (first 10 lines):"
+            echo "$OUTPUT" | head -10 | sed 's/^/     /'
         else
             fail "list_copilot.sh returns empty output"
         fi
@@ -106,6 +112,8 @@ if [ "$ENGINE_FILTER" = "all" ] || [ "$ENGINE_FILTER" = "ollama" ]; then
         OUTPUT=$(./ollama/list_ollama.sh 2>/dev/null)
         if [ -n "$OUTPUT" ]; then
             pass "list_ollama.sh returns model list"
+            echo "   Models (first 10 lines):"
+            echo "$OUTPUT" | head -10 | sed 's/^/     /'
         else
             fail "list_ollama.sh returns empty output"
         fi
