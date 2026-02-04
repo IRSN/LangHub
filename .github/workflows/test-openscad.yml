@@ -10,7 +10,9 @@ on:
 jobs:
   test-openscad-godiva:
     name: Test Godiva OpenSCAD
-    runs-on: ${{ fromJSON(format('[\"self-hosted\", \"{0}\"]', matrix.engine)) }}
+    runs-on: 
+      - self-hosted
+      - ${{ matrix.engine }}
     strategy:
       matrix:
         engine: [ollama, claude, copilot]
@@ -22,9 +24,10 @@ jobs:
       
       - name: Make scripts executable
         run: chmod +x *.sh lh test/*.sh
-      
-      - name: Check ${{ matrix.engine }} status
-        run: ./lh login ${{ matrix.engine }}
+ 
+## Assuming login is not needed for self-hosted runners
+#      - name: Check ${{ matrix.engine }} status
+#        run: ./lh login ${{ matrix.engine }}
       
       - name: List ${{ matrix.engine }} models
         run: ./lh list ${{ matrix.engine }}
