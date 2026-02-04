@@ -37,7 +37,7 @@ info() {
 
 # Clean up any previous test outputs
 cleanup() {
-    rm -f printtest-render.md claudetest-render.md copilottest-render.md ollamatest-render.md
+    rm -f test-render-print.md test-render-claude.md test-render-copilot.md test-render-ollama.md
     rm -rf output/
 }
 
@@ -48,13 +48,13 @@ cleanup
 
 # Determine which test file to use based on engine filter
 if [ "$ENGINE_FILTER" = "ollama" ]; then
-    TEST_FILE="ollamatest-render.lmd"
+    TEST_FILE="test-render-ollama.lmd"
 elif [ "$ENGINE_FILTER" = "claude" ]; then
-    TEST_FILE="claudetest-render.lmd"
+    TEST_FILE="test-render-claude.lmd"
 elif [ "$ENGINE_FILTER" = "copilot" ]; then
-    TEST_FILE="copilottest-render.lmd"
+    TEST_FILE="test-render-copilot.lmd"
 else
-    TEST_FILE="printtest-render.lmd"
+    TEST_FILE="test-render-print.lmd"
 fi
 
 OUTPUT_FILE="${TEST_FILE%.lmd}.md"
@@ -78,7 +78,7 @@ else
 fi
 
 # Test 3: Log file created (only for printtest which has log directive)
-if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
+if [ "$TEST_FILE" = "test-render-print.lmd" ]; then
     info "Test 3: Check if log file was created"
     if [ -f "output/test.log" ]; then
         pass "Log file created"
@@ -123,7 +123,7 @@ else
 fi
 
 # Test 6: Content correctness (only for printtest)
-if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
+if [ "$TEST_FILE" = "test-render-print.lmd" ]; then
     info "Test 6: Verify markdown content includes prompt output"
     if grep -q "Hello, this is a simple test output" "$OUTPUT_FILE"; then
         pass "Markdown output contains expected content"

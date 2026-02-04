@@ -41,7 +41,7 @@ jobs:
 #          fi
       
       - name: Run Godiva OpenSCAD generation test
-        run: cd test && bash godiva-openscad-${{ matrix.engine }}.sh
+        run: cd test && bash test-render-${{ matrix.engine }}-openscad.sh
       
       - name: Upload generated OpenSCAD artifacts
         uses: actions/upload-artifact@v4
@@ -49,6 +49,6 @@ jobs:
         with:
           name: openscad-godiva-${{ matrix.engine }}
           path: |
-            test/godiva-openscad-${{ matrix.engine }}.md
+            test/test-render-${{ matrix.engine }}-openscad.md
             test/output/godiva-${{ matrix.engine }}.log
           retention-days: 30
