@@ -9,13 +9,13 @@ on:
 
 jobs:
   test-openscad-godiva:
-    name: Test Godiva OpenSCAD with ${{ matrix.engine }}
-    runs-on: [self-hosted, ${{ matrix.engine }}]
     strategy:
       matrix:
         engine: [ollama, claude, copilot]
       fail-fast: false
-    
+    name: Test Godiva OpenSCAD with ${{ matrix.engine }}
+    runs-on: [self-hosted, ${{ matrix.engine }}]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
