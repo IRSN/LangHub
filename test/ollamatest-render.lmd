@@ -2,12 +2,12 @@
 
 ## Simple Ollama test
 
-```ollama, model=qwen3:8b
+```ollama, model=qwen3-coder:30b
 What is 2+2? Answer with just the number.
 ```
 
 ## Ollama test with log file
 
-```ollama, model=qwen3:8b, log=output/ollama-test.log
+```ollama, model=qwen3-coder:30b, log=output/ollama-test.log
 List 3 colors, one per line.
 ```
