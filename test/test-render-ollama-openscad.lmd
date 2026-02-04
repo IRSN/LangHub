@@ -4,7 +4,7 @@ This test generates OpenSCAD models using Ollama.
 
 ## Ollama Generation
 
-```ollama, model=qwen2.5-coder:7b, context=lib/, log=output/godiva-ollama.log
+```ollama, model=qwen3.5-coder:latest, context=lib/, log=output/godiva-ollama.log
 Based on the technical documentation provided, generate a complete OpenSCAD script for a Godiva device.
 
 Requirements:
