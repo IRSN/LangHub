@@ -1,0 +1,53 @@
+GODIVA DEVICE TECHNICAL SPECIFICATIONS
+=======================================
+
+OVERVIEW
+--------
+The Godiva device is a compact modular system consisting of three main components:
+1. Core Assembly - Central processing and power unit
+2. Housing/Shell - Protective enclosure with thermal management
+3. Control Interface Panel - User interaction and status display
+
+DIMENSIONS
+----------
+Core Assembly:
+- Length: 150mm
+- Width: 100mm  
+- Height: 50mm
+- Wall thickness: 3mm
+- Mounting hole diameter: 4mm (M4 screws)
+- Mounting hole spacing: 140mm x 90mm (center-to-center)
+
+Housing/Shell:
+- Internal clearance: 5mm around core assembly
+- Overall dimensions: 165mm x 115mm x 70mm
+- Wall thickness: 2.5mm
+- Ventilation holes: 6mm diameter, 10mm spacing
+- Base mounting: 4x M5 holes at corners
+
+Control Interface Panel:
+- Size: 100mm x 60mm x 3mm
+- Button cutouts: 12mm diameter
+- LED indicator holes: 5mm diameter
+- Display cutout: 40mm x 20mm rectangular
+- Text height: 3mm
+- Panel mounting: 4x M3 screws
+
+MATERIALS
+---------
+- Core: Aluminum or ABS plastic
+- Housing: ABS or polycarbonate
+- Panel: Acrylic or polycarbonate
+
+TOLERANCES
+----------
+- General: ±0.2mm
+- Mounting holes: ±0.1mm
+- Mating surfaces: ±0.05mm
+
+ASSEMBLY NOTES
+--------------
+- Core assembly mounts to housing base with M4 screws
+- Panel attaches to front face with M3 screws
+- Ensure proper cable routing between components
+- Test fit before final assembly

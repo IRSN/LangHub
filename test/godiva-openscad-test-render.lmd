@@ -1,0 +1,57 @@
+# Godiva Device OpenSCAD Test - All Engines
+
+This test file generates OpenSCAD models using all three engines for comparison.
+
+## Ollama Generation
+
+```ollama, model=qwen2.5-coder:7b, context=lib/, log=output/godiva-ollama.log
+Based on the technical documentation provided, generate a complete OpenSCAD script for a Godiva device.
+
+Requirements:
+- Use proper OpenSCAD syntax
+- Include parametric design with variables
+- Add comments explaining each section
+- Make dimensions based on specifications from the documentation
+- Include mounting points and connection interfaces
+- Use modules for reusability
+- Include three parts: core assembly, housing/shell, and control panel
+- Add a final assembly module showing all parts in position
+
+Generate only the OpenSCAD code, no explanations outside comments.
+```
+
+## Claude Generation
+
+```claude, model=claude-3-5-sonnet-20241022, context=lib/, log=output/godiva-claude.log
+Based on the technical documentation provided, generate a complete OpenSCAD script for a Godiva device.
+
+Requirements:
+- Use proper OpenSCAD syntax
+- Include parametric design with variables
+- Add comments explaining each section
+- Make dimensions based on specifications from the documentation
+- Include mounting points and connection interfaces
+- Use modules for reusability
+- Include three parts: core assembly, housing/shell, and control panel
+- Add a final assembly module showing all parts in position
+
+Generate only the OpenSCAD code, no explanations outside comments.
+```
+
+## Copilot Generation
+
+```copilot, model=claude-sonnet-4.5, context=lib/, log=output/godiva-copilot.log
+Based on the technical documentation provided, generate a complete OpenSCAD script for a Godiva device.
+
+Requirements:
+- Use proper OpenSCAD syntax
+- Include parametric design with variables
+- Add comments explaining each section
+- Make dimensions based on specifications from the documentation
+- Include mounting points and connection interfaces
+- Use modules for reusability
+- Include three parts: core assembly, housing/shell, and control panel
+- Add a final assembly module showing all parts in position
+
+Generate only the OpenSCAD code, no explanations outside comments.
+```

@@ -1,0 +1,65 @@
+name: Test OpenSCAD Generation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test-openscad-godiva:
+    name: Test Godiva OpenSCAD Dataset
+    runs-on: [self-hosted, ollama, claude, copilot]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Make scripts executable
+        run: chmod +x *.sh lh test/*.sh
+      
+## Assuming authentication is handled by the self-hosted runner
+#        - name: Check all engines status
+#        run: |
+#          echo "=== Checking Ollama ==="
+#          ./lh login ollama
+#          echo ""
+#          echo "=== Checking Claude ==="
+#          ./lh login claude
+#          echo ""
+#          echo "=== Checking Copilot ==="
+#          ./lh login copilot
+      
+      - name: List all engines models
+        run: |
+          echo "=== Ollama Models ==="
+          ./lh list ollama
+          echo ""
+          echo "=== Claude Models ==="
+          ./lh list claude
+          echo ""
+          echo "=== Copilot Models ==="
+          ./lh list copilot
+      
+      - name: Ensure Ollama model available
+        run: |
+          if ! ollama list | grep -q qwen2.5-coder:7b; then
+            echo "Pulling qwen2.5-coder:7b model..."
+            ollama pull qwen2.5-coder:7b
+          fi
+      
+      - name: Run Godiva OpenSCAD generation tests
+        run: cd test && bash godiva-openscad-test-render.sh
+      
+      - name: Upload generated OpenSCAD artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openscad-godiva-all-engines
+          path: |
+            test/godiva-openscad-ollama.md
+            test/godiva-openscad-claude.md
+            test/godiva-openscad-copilot.md
+            test/output/godiva-*.log
+          retention-days: 30
