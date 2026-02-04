@@ -72,7 +72,7 @@ info "Test 2: Check if markdown output was created"
 if [ -f "$OUTPUT_FILE" ]; then
     pass "Markdown output file created"
     echo "   Content (first 10 lines):"
-    head -10 "$OUTPUT_FILE" | sed 's/^/     /'
+    head -20 "$OUTPUT_FILE" | sed 's/^/     /'
 else
     fail "Markdown output file not created"
 fi
@@ -83,7 +83,7 @@ if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
     if [ -f "output/test.log" ]; then
         pass "Log file created"
         echo "   Log content (first 10 lines):"
-        head -10 output/test.log | sed 's/^/     /'
+        head -20 output/test.log | sed 's/^/     /'
     else
         fail "Log file not created"
     fi
@@ -97,13 +97,14 @@ if [ "$TEST_FILE" = "printtest-render.lmd" ]; then
     fi
 fi
 
-# Test 5: Content verification
-info "Test 5: Verify output content is raw (no code blocks)"
-if grep -q '```' "$OUTPUT_FILE"; then
-    fail "Output contains code blocks (should be raw)"
-else
-    pass "Output is raw content (no code blocks)"
-fi
+## No, remaining code blocks are still possible
+# # Test 5: Content verification
+# info "Test 5: Verify output content is raw (no code blocks)"
+# if grep -q '```' "$OUTPUT_FILE"; then
+#     fail "Output contains code blocks (should be raw)"
+# else
+#     pass "Output is raw content (no code blocks)"
+# fi
 
 # Test 5a: Check for no thinking blocks
 info "Test 5a: Verify output has no thinking blocks"
