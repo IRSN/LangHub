@@ -28,17 +28,17 @@ jobs:
 ## Assuming login is not needed for self-hosted runners
 #      - name: Check ${{ matrix.engine }} status
 #        run: ./lh login ${{ matrix.engine }}
-      
-      - name: List ${{ matrix.engine }} models
-        run: ./lh list ${{ matrix.engine }}
-      
-      - name: Ensure Ollama model (if ollama)
-        if: matrix.engine == 'ollama'
-        run: |
-          if ! ollama list | grep -q qwen2.5-coder:7b; then
-            echo "Pulling qwen2.5-coder:7b model..."
-            ollama pull qwen2.5-coder:7b
-          fi
+#      
+#      - name: List ${{ matrix.engine }} models
+#        run: ./lh list ${{ matrix.engine }}
+#      
+#      - name: Ensure Ollama model (if ollama)
+#        if: matrix.engine == 'ollama'
+#        run: |
+#          if ! ollama list | grep -q qwen2.5-coder:7b; then
+#            echo "Pulling qwen2.5-coder:7b model..."
+#            ollama pull qwen2.5-coder:7b
+#          fi
       
       - name: Run Godiva OpenSCAD generation test
         run: cd test && bash godiva-openscad-${{ matrix.engine }}.sh
