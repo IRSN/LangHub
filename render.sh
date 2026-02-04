@@ -199,7 +199,14 @@ while IFS= read -r line || [ -n "$line" ]; do
             fi
 
             # Build ask.sh command
-            CMD=("$SCRIPT_DIR/ask.sh" "$ENGINE" "$MODEL_ID" "$PROMPT_TEXT")
+            # Append instruction to include code inline instead of creating external files
+            ENHANCED_PROMPT="$PROMPT_TEXT
+
+IMPORTANT: Include the complete response directly in your output within appropriate code blocks if applicable.
+Do NOT create external files. Do NOT use file writing tools.
+Embed all content inline in your response."
+            
+            CMD=("$SCRIPT_DIR/ask.sh" "$ENGINE" "$MODEL_ID" "$ENHANCED_PROMPT")
 
             if [ -n "$CONTEXT_PATH" ]; then
                 CMD+=(--context "$CONTEXT_PATH")
@@ -243,11 +250,20 @@ while IFS= read -r line || [ -n "$line" ]; do
                 cat "$MODEL_RESPONSE" >> "$MARKDOWN_OUTPUT"
                 echo "" >> "$MARKDOWN_OUTPUT"
             else
+                # Include error message in output instead of exiting
                 echo "" >> "$MARKDOWN_OUTPUT"
-                echo "<!-- Block $BLOCK_COUNT failed -->" >> "$MARKDOWN_OUTPUT"
-                echo "Error processing block" >> "$MARKDOWN_OUTPUT"
+                echo "<!-- Block $BLOCK_COUNT failed to process -->" >> "$MARKDOWN_OUTPUT"
+                echo "**Error:** Failed to generate response for this block." >> "$MARKDOWN_OUTPUT"
                 echo "" >> "$MARKDOWN_OUTPUT"
-                exit 1
+                echo "- Engine: $ENGINE" >> "$MARKDOWN_OUTPUT"
+                echo "- Model: $MODEL_ID" >> "$MARKDOWN_OUTPUT"
+                if [ -n "$CONTEXT_PATH" ]; then
+                    echo "- Context: $CONTEXT_PATH" >> "$MARKDOWN_OUTPUT"
+                fi
+                if [ -n "$FULL_LOG_PATH" ]; then
+                    echo "- See log file for details: $FULL_LOG_PATH" >> "$MARKDOWN_OUTPUT"
+                fi
+                echo "" >> "$MARKDOWN_OUTPUT"
             fi
 
             rm -f "$MODEL_RESPONSE"
