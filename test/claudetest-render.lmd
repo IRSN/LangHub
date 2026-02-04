@@ -2,12 +2,12 @@
 
 ## Simple Claude test
 
-```claude, model=claude-3-5-haiku-20241022
+```claude, model=haiku
 What is 2+2? Answer with just the number.
 ```
 
 ## Claude test with log file
 
-```claude, model=claude-3-5-haiku-20241022, log=output/claude-test.log
+```claude, model=haiku, log=output/claude-test.log
 List 3 colors, one per line.
 ```
