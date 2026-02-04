@@ -23,8 +23,8 @@ jobs:
 #      - name: Check Ollama status
 #        run: ./lh login ollama
       
-      - name: List Ollama models
-        run: ./lh list ollama
+#      - name: List Ollama models
+#        run: ./lh list ollama
       
       - name: Run Ollama tests
         run: cd test && bash tests.sh ollama
